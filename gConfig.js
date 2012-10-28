@@ -12,7 +12,7 @@
  * Author: [[w:pl:User:Matma Rex]]
  */
 (function(mw, $){
-	mw.loader.using(['jquery.cookie'], function(){
+	mw.loader.using(['jquery.cookie', 'mediawiki.api'], function(){
 		// Global gConfig object.
 		var gConfig = {};
 		// Data of all managed gadgets and settings. 
