@@ -7,12 +7,26 @@
  * 
  * For more examples, see per-function docs below.
  * 
- * Version: 0.1
+ * Version: 0.2
  * Dual-licensed CC-BY-SA 3.0 or newer, GFDL 1.3 or newer
  * Author: [[w:pl:User:Matma Rex]]
  */
 (function(mw, $){
-	mw.loader.using(['jquery.cookie', 'mediawiki.api'], function(){
+	mw.loader.using(['jquery.cookie', 'mediawiki', 'mediawiki.api'], function(){
+		mw.messages.set({
+			'gConfig-prefs-page-info': "Na tej stronie możesz zmienić ustawienia wykorzystywane przez gadżety.",
+			'gConfig-prefs-page-title': "Preferencje gadżetów",
+			'gConfig-prefs-personal-link': "Preferencje gadżetów",
+			'gConfig-prefs-save': "Zapisz",
+			'gConfig-prefs-saving': "Zapisywanie...",
+			'gConfig-prefs-saved': "Zapisano!",
+			'gConfig-prefs-invalid-values': "Nieprawidłowe wartości.",
+			'gConfig-prefs-legacy-setting': "To ustawienie jest w tej chwili wpisane na stałe w jednym z twoich plików .js. Usuń je stamtąd, aby stało się modyfikowalne.",
+			'gConfig-prefs-not-an-integer': "Podana wartość nie jest liczbą całkowitą.",
+			'gConfig-prefs-out-of-range-min': "Podana wartość jest mniejsza od minimalnej dozwolonej.",
+			'gConfig-prefs-out-of-range-max': "Podana wartość jest większa od maksymalnej dozwolonej."
+		});
+		
 		// Global gConfig object.
 		var gConfig = {};
 		// Data of all managed gadgets and settings. 
@@ -58,7 +72,7 @@
 				var value = settings[i][2];
 				
 				$.cookie(name, value, {expires: 365});
-				if((''+value).indexOf('|') != -1) {
+				if((''+value).match(/\|/)) {
 					api.post({
 						action:'options', optionname:name, optionvalue:value, token:optionsToken
 					}).done(function(j){ saveSettingsCallback(1) });
@@ -99,6 +113,7 @@
 		
 		// validates and canonicalizes setting's values.
 		// doesn't catch errors raised by validation().
+		// can throw further errors (for numeric values: not an int, out of range)
 		function validateAndCanonicalize(value, type, validation)
 		{
 			if(type == 'boolean') {
@@ -106,6 +121,7 @@
 			} else if(type == 'string') {
 				value = '' + value;
 			} else if(type == 'integer') {
+				if(parseInt(value, 10) != parseFloat(value)) throw mw.msg('gConfig-prefs-not-an-integer');
 				value = parseInt(value, 10);
 			} else if(type == 'numeric') {
 				value = parseFloat(value);
@@ -115,8 +131,8 @@
 				value = validation(value);
 			} else if($.isArray(validation) && (type == 'integer' || type == 'numeric')) {
 				var min = validation[0], max = validation[1];
-				if(value < min) value = min;
-				if(value > max) value = max;
+				if(value < min) throw mw.msg('gConfig-prefs-out-of-range-min');
+				if(value > max) throw mw.msg('gConfig-prefs-out-of-range-max');
 			}
 			
 			return value;
@@ -192,6 +208,14 @@
 			for(var i=0; i<settings.length; i++) {
 				var sett = settings[i];
 				var value;
+				
+				// do some basic input validation to prevent nondescriptive errors later
+				var errorMessage = "missing % in setting #"+i+" for "+gadget;
+				if(!sett.name) throw errorMessage.replace('%', 'name')
+				if(!sett.desc) throw errorMessage.replace('%', 'desc')
+				if(!sett.type) throw errorMessage.replace('%', 'type')
+				if(sett.default == undefined) throw errorMessage.replace('%', 'default')
+				
 				var isLegacy = false;
 				if(sett.legacy) {
 					var object, property;
@@ -325,11 +349,10 @@
 			api.get({action:'tokens', type:'options'}).done(function(json){ optionsToken = json['tokens']['optionstoken'] });
 			
 			
-			var $content = $('<form>');
-			$content.on('submit', function(e){
+			var onsubmit = function(e){
 				if(!nowSaving) {
 					nowSaving = true;
-					$content.find('u').remove(); // remove bad data infos
+					$content.find('.gconfig-pref-error').empty(); // remove infos about invalid values, if any
 					
 					var toSave = [];
 					var errors = [];
@@ -355,29 +378,36 @@
 					}
 					
 					if(errors.length > 0) {
-						$('#gconfig-save-status').attr('class', 'error').text("Nieprawidłowe wartości.");
+						$('#gconfig-save-status').attr('class', 'gconfig-save-error').text( mw.msg('gConfig-prefs-invalid-values') );
 						for(var i=0; i<errors.length; i++) {
 							var id = errors[i][0], info = errors[i][1];
-							$('#'+id).closest('p').append( ' ', $('<u>').text(info) );
+							$('#'+id).closest('tr').find('.gconfig-pref-error').text(info)
 						}
 						nowSaving = false;
 					}
 					else {
-						$('#gconfig-save-status').attr('class', '').text("Zapisywanie...");
+						$('#gconfig-save-status').attr('class', '').text( mw.msg('gConfig-prefs-saving') );
 						saveSettings(toSave, function(){
 							nowSaving = false;
-							$('#gconfig-save-status').attr('class', 'success').text("Zapisano!");
+							$('#gconfig-save-status').attr('class', 'gconfig-save-success').text( mw.msg('gConfig-prefs-saved') );
 						})
 					}
 				}
 				
 				e.preventDefault();
 				return false;
-			})
+			}
 			
+			var $content = $('<table>');
 			for(var i=0; i<gConfig.registeredGadgets.length; i++) {
 				var gadget = gConfig.registeredGadgets[i];
-				$content.append( $('<h2>').text(gConfig.readableNames[gadget]) );
+				$content.append(
+					$('<tr>').append(
+						$('<td>').attr('colspan', 2).append(
+							$('<h2>').text(gConfig.readableNames[gadget])
+						)
+					)
+				);
 				
 				for(var j=0; j<gConfig.data[gadget].length; j++) {
 					var setting = gConfig.data[gadget][j];
@@ -386,38 +416,46 @@
 					var $input = inputFor( gConfig.get(gadget, setting.name), setting.type, setting.validation );
 					$input.attr('name', inputName).attr('id', inputName);
 					$input.data({ 'gconfig-type': setting.type, 'gconfig-validation': setting.validation });
-					if(gConfig.legacySettings.indexOf(inputName) != -1) {
-						$input.prop('disabled', true);
-						$input.attr('title', "To ustawienie jest w tej chwili wpisane na stałe w jednym z twoich plików .js. Usuń je stamtąd, aby stało się modyfikowalne.");
-					}
+					
+					var isLegacy = !!($.inArray(inputName, gConfig.legacySettings) != -1);
 					
 					$content.append(
-						$('<p>').append(
-							$('<label>', {'for': inputName}).append(
-								$input,
-								' ',
-								setting.desc
+						$('<tr>').append(
+							$('<td>').append( $input.prop('disabled', !!isLegacy) ),
+							$('<td>').append(
+								$('<p>').addClass('gconfig-pref-label').append( $('<label>').attr('for', inputName).text(setting.desc) ),
+								$('<p>').addClass('gconfig-pref-legacy-note').text( isLegacy ? mw.msg('gConfig-prefs-legacy-setting') : '' ),
+								$('<p>').addClass('gconfig-pref-error')
 							)
 						)
 					)
 				}
 			}
 			
-			$content.append( $('<p>').append(
-				$("<input type=submit>").attr('value', 'Zapisz') ),
-				' ',
-				$('<span>').attr('id', 'gconfig-save-status')
-			);
+			// save button
+			$content.append(
+				$('<tr>').append(
+					$('<td>'),
+					$('<td>').append(
+						$('<input type=submit>').attr('id', 'gconfig-save-button').attr('value', mw.msg('gConfig-prefs-save') ),
+						$('<p>').attr('id', 'gconfig-save-status')
+					)
+				)
+			)
 			
-			var info = $('<p>').text('Na tej stronie możesz zmienić ustawienia wykorzystywane przez gadżety.');
-			document.title = 'Preferencje gadżetów';
-			$('h1').first().text('Preferencje gadżetów');
-			$('#mw-content-text').empty().append(info, $content);
+			$form = $('<form>').attr('id', 'gconfig-form').append( $content );
+			$form.on('submit', onsubmit);
+			$form.on('invalid', onsubmit); // we do our own validation - stop the browser from showing its error messages
+			
+			var info = $('<p>').text( mw.msg('gConfig-prefs-page-info') );
+			document.title = mw.msg('gConfig-prefs-page-title');
+			$('h1').first().text( mw.msg('gConfig-prefs-page-title') );
+			$('#mw-content-text').empty().append(info, $form);
 		}
 		
 		$(document).ready(function(){
-			mw.util.addPortletLink('p-personal', mw.util.wikiGetlink('Special:GadgetPrefs'), 'Preferencje gadżetów', 'pt-gadgetprefs', null, null, document.getElementById('pt-watchlist'));
-		$('#pt-gadgetprefs').hide();
+			mw.util.addPortletLink('p-personal', mw.util.wikiGetlink('Special:GadgetPrefs'), mw.msg('gConfig-prefs-personal-link'), 'pt-gadgetprefs', null, null, document.getElementById('pt-watchlist'));
+			$('#pt-gadgetprefs').hide();
 		});
 		
 		window.gConfig = gConfig;
