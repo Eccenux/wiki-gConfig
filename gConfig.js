@@ -9,7 +9,7 @@
  * 
  * See also gConfig.css.
  * 
- * Version: 0.2
+ * Version: 0.3
  * Dual-licensed CC-BY-SA 3.0 or newer, GFDL 1.3 or newer
  * Author: [[w:pl:User:Matma Rex]]
  */
@@ -73,7 +73,7 @@
 				var name = internalName(settings[i][0], settings[i][1]);
 				var value = settings[i][2];
 				
-				$.cookie(name, value, {expires: 365});
+				$.cookie(name, value, {expires: 365, path:'/'});
 				if((''+value).match(/\|/)) {
 					api.post({
 						action:'options', optionname:name, optionvalue:value, token:optionsToken
@@ -228,9 +228,11 @@
 					}
 					
 					if(object[property] != undefined) {
-						value = object[property];
-						gConfig.legacySettings.push( internalName(gadget, sett.name) );
-						isLegacy = true;
+						try {
+							value = validateAndCanonicalize(object[property], sett.type, sett.validation);
+							gConfig.legacySettings.push( internalName(gadget, sett.name) );
+							isLegacy = true;
+						} catch(er) {} // if validation error, ignore this
 					}
 				}
 				if(!isLegacy) {
