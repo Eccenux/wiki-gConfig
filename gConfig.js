@@ -247,7 +247,7 @@
 			gConfig.registeredGadgets.push(gadget);
 			gConfig.readableNames[gadget] = readableName;
 			
-			$('#pt-gadgetprefs').show();
+			// $('#pt-gadgetprefs').show();
 			
 			if(needSynchro) {
 				needSynchro = false;
@@ -457,10 +457,10 @@
 			$('#mw-content-text').empty().append(info, $form);
 		}
 		
-		$(document).ready(function(){
+		/* $(document).ready(function(){
 			mw.util.addPortletLink('p-personal', mw.util.wikiGetlink('Special:GadgetPrefs'), mw.msg('gConfig-prefs-personal-link'), 'pt-gadgetprefs', null, null, document.getElementById('pt-watchlist'));
 			$('#pt-gadgetprefs').hide();
-		});
+		}); */
 		
 		window.gConfig = gConfig;
 	})
