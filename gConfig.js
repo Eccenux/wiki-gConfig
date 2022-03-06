@@ -100,11 +100,13 @@
 		function readRawSetting(gadget, settingName)
 		{
 			var name = internalName(gadget, settingName);
-			var value = mw.user.options.get('userjs-'+name);
-			if(value == undefined) value = $.cookie(name);
+			var uo_value = mw.user.options.get('userjs-'+name);
+			var cookie_value = $.cookie(name);
 			
-			if(value == undefined || mw.user.options.get('userjs-'+name) != $.cookie(name) ) needSynchro = true;
-			if(mw.user.getName() == "Wargo" && needSynchro) console.log(name, mw.user.options.get('userjs-'+name), $.cookie(name));
+			if(uo_value == undefined) value = cookie_value;
+			
+			if((value == undefined || uo_value != cookie_value) && !(uo_value == null && cookie_value == '')) needSynchro = true;
+			if(mw.user.getName() == "Wargo" && needSynchro) console.log(name, uo_value, cookie_value);
 			
 			return value;
 		}
