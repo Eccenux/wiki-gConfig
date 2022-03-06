@@ -70,7 +70,7 @@
 				var name = internalName(settings[i][0], settings[i][1]);
 				var value = settings[i][2];
 				
-				$.cookie(name, value, {expires: 365, path:'/'});
+				$.cookie(name, value, {expires: 365, path: '/', secure: true});
 				if((''+value).match(/\|/)) {
 					api.saveOption('userjs-'+name, value).done(function(j){ saveSettingsCallback(1) });
 				}
