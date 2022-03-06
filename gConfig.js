@@ -106,8 +106,7 @@
 			value = (uo_value == undefined) ? cookie_value : uo_value;
 			
 			if((value == undefined || uo_value != cookie_value) && !(uo_value == null && cookie_value == '')) needSynchro = true;
-			if(mw.user.getName() == "Wargo" && needSynchro) console.log(name, uo_value, cookie_value);
-			
+
 			return value;
 		}
 		
