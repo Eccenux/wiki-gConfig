@@ -64,7 +64,7 @@
 			settingsCurrentCount = 0;
 			saveSettingsUserCallback = callback;
 			
-			var grouped = []
+			var grouped = [];
 			
 			for(var i=0; i<settings.length; i++) {
 				var name = internalName(settings[i][0], settings[i][1]);
@@ -104,6 +104,7 @@
 			if(value == undefined) value = $.cookie(name);
 			
 			if(value == undefined || mw.user.options.get('userjs-'+name) != $.cookie(name) ) needSynchro = true;
+			if(mw.user.getName() == "Wargo" && needSynchro) console.log(name, mw.user.options.get('userjs-'+name), $.cookie(name));
 			
 			return value;
 		}
@@ -220,10 +221,10 @@
 				
 				// do some basic input validation to prevent nondescriptive errors later
 				var errorMessage = "missing % in setting #"+i+" for "+gadget;
-				if(!sett.name) throw errorMessage.replace('%', 'name')
-				if(!sett.desc) throw errorMessage.replace('%', 'desc')
-				if(!sett.type) throw errorMessage.replace('%', 'type')
-				if(sett.deflt == undefined) throw errorMessage.replace('%', 'deflt')
+				if(!sett.name) throw errorMessage.replace('%', 'name');
+				if(!sett.desc) throw errorMessage.replace('%', 'desc');
+				if(!sett.type) throw errorMessage.replace('%', 'type');
+				if(sett.deflt == undefined) throw errorMessage.replace('%', 'deflt');
 				
 				var isLegacy = false;
 				if(sett.legacy) {
@@ -243,7 +244,7 @@
 					}
 				}
 				if(!isLegacy) {
-					value = readRawSetting(gadget, sett.name)
+					value = readRawSetting(gadget, sett.name);
 					if(value == undefined) value = sett.deflt;
 					value = validateAndCanonicalize(value, sett.type, sett.validation);
 				}
