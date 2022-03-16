@@ -103,7 +103,7 @@
 			var uo_value = mw.user.options.get('userjs-'+name);
 			var cookie_value = $.cookie(name);
 			
-			value = (uo_value == undefined) ? cookie_value : uo_value;
+			var value = (uo_value == undefined) ? cookie_value : uo_value;
 			
 			if((value == undefined || uo_value != cookie_value) && !(uo_value == null && cookie_value == '')) needSynchro = true;
 
