@@ -9,7 +9,7 @@
  * 
  * See also gConfig.css.
  * 
- * Version: 1.0.1
+ * Version: 1.1.0
  * Dual-licensed CC-BY-SA 3.0 or newer, GFDL 1.3 or newer
  * Author: [[w:pl:User:Matma Rex]], patches: [[w:pl:User:Kaligula]], [[w:pl:User:Peter Bowman]]
  * 
@@ -19,7 +19,7 @@
  * Deployed with love using Wikiploy: [[Wikipedia:Wikiploy]]
  */
 (function(mw, $){
-	mw.loader.using(['mediawiki.cookie', 'mediawiki.api', 'mediawiki.jqueryMsg'], function(){
+	mw.loader.using(['mediawiki.cookie', 'mediawiki.api', 'mediawiki.jqueryMsg', 'ext.gadget.lib-localforage'], function(){
 		mw.messages.set({
 			'gConfig-prefs-page-info': "<p>Na tej stronie możesz zmienić ustawienia włączonych gadżetów.</p><p>Informacje i dokumentacja: [[{{ns:Project}}:Narzędzia/gConfig]].</p>",
 			'gConfig-prefs-page-title': "Preferencje gadżetów",
@@ -44,7 +44,7 @@
 		var api = new mw.Api();
 		
 		// generate internal name for this setting.
-		// used as input names, cookie names, options' names...
+		// used as input names, storage names, options' names...
 		function internalName(gadget, setting)
 		{
 			return 'gconfig-'+gadget+'-'+setting;
@@ -57,19 +57,21 @@
 			return [gadget, setting];
 		}
 		
-		var totalSettingsCount = 0;
-		var settingsCurrentCount = 0;
-		var saveSettingsUserCallback = null;
-		// saves settings in cookies and in prefs
+		/** Helper to use ES6 Promises on mw.Api calls etc. */
+		function $toPromise($promise)
+		{
+			return new Promise(function (resolve, reject) {
+				$promise.then(resolve, reject);
+			});
+		}
+
+		// saves settings in browser storage and in prefs
 		// settings - array of arrays: [gadget, settingName, value]
 		// calls saveSettingsCallback after every successful request
 		function saveSettings(settings, callback)
 		{
-			totalSettingsCount = settings.length;
-			settingsCurrentCount = 0;
-			saveSettingsUserCallback = callback;
-			
-			var grouped = [];
+			var grouped = {};
+			var promises = [];
 			
 			for(var i=0; i<settings.length; i++) {
 				var name = internalName(settings[i][0], settings[i][1]);
@@ -77,26 +79,20 @@
 				
 				$.cookie(name, value, {expires: 365, path: '/', secure: true});
 				if((''+value).match(/\|/)) {
-					api.saveOption('userjs-'+name, value).done(function(){ saveSettingsCallback(1) });
+					promises.push($toPromise(api.saveOption('userjs-'+name, value)));
 				}
 				else {
-					grouped.push('userjs-'+name+'='+value);
+					grouped['userjs-'+name] = value;
 				}
 			}
 			
-			api.postWithToken('csrf', {
-				formatversion:2, action:'options', change:grouped.join('|')
-			}).done(function(){ saveSettingsCallback(grouped.length) });
+			promises.push($toPromise(api.saveOptions(grouped)));
+
+			Promise.all(promises).then(function(){
+				callback();
+			});
 			
 			return true;
-		}
-		function saveSettingsCallback(increment)
-		{
-			settingsCurrentCount += increment;
-			if(settingsCurrentCount == totalSettingsCount)
-			{
-				if(saveSettingsUserCallback) saveSettingsUserCallback();
-			}
 		}
 		
 		// reads raw setting from mw.user.options or cookies.
@@ -479,9 +475,17 @@
 			document.title = mw.msg('gConfig-prefs-page-title');
 			$('h1').first().text( mw.msg('gConfig-prefs-page-title') );
 			$('#mw-content-text').empty().append($info, $form);
+
+			return true;	// done
 		}
 		
 		window.gConfig = gConfig;
-		specialPage();
+		// usage: mw.hook('userjs.gConfig.ready').add(function (gConfig) {});
+		mw.hook('userjs.gConfig.ready').fire(gConfig);
+
+		// prepare GadgetPrefs page
+		if (specialPage()) {
+			mw.hook('userjs.gConfig.specialPage').fire(gConfig);
+		}
 	})
 })(mediaWiki, jQuery);
