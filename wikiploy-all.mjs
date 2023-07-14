@@ -14,6 +14,7 @@ ployBot.summary = () => {
 (async () => {
 	const configs = [];
 
+	/**/
 	// dev
 	configs.push(new DeployConfig({
 		src: 'gConfig.js',
@@ -31,6 +32,7 @@ ployBot.summary = () => {
 		src: 'gConfig.css',
 		dst: 'MediaWiki:Gadget-gConfig.css',
 	}));
+	/**/
 
 	// Gadget @plws
 	configs.push(new DeployConfig({
