@@ -9,7 +9,7 @@
  * 
  * See also gConfig.css.
  * 
- * Version: 1.0.0
+ * Version: 1.0.1
  * Dual-licensed CC-BY-SA 3.0 or newer, GFDL 1.3 or newer
  * Author: [[w:pl:User:Matma Rex]], patches: [[w:pl:User:Kaligula]], [[w:pl:User:Peter Bowman]]
  * 
@@ -77,7 +77,7 @@
 				
 				$.cookie(name, value, {expires: 365, path: '/', secure: true});
 				if((''+value).match(/\|/)) {
-					api.saveOption('userjs-'+name, value).done(function(j){ saveSettingsCallback(1) });
+					api.saveOption('userjs-'+name, value).done(function(){ saveSettingsCallback(1) });
 				}
 				else {
 					grouped.push('userjs-'+name+'='+value);
@@ -86,7 +86,7 @@
 			
 			api.postWithToken('csrf', {
 				formatversion:2, action:'options', change:grouped.join('|')
-			}).done(function(j){ saveSettingsCallback(grouped.length) });
+			}).done(function(){ saveSettingsCallback(grouped.length) });
 			
 			return true;
 		}
@@ -246,6 +246,7 @@
 							value = validateAndCanonicalize(object[property], sett.type, sett.validation);
 							gConfig.legacySettings.push( internalName(gadget, sett.name) );
 							isLegacy = true;
+						// eslint-disable-next-line no-empty
 						} catch(er) {} // if validation error, ignore this
 					}
 				}
@@ -334,7 +335,7 @@
 		
 		function inputFor(value, type, validation)
 		{
-			input = null;
+			var input = null;
 			
 			if(type == 'boolean') {
 				input = $('<input type=checkbox>').prop('checked', !!value);
@@ -387,6 +388,7 @@
 					
 					if(errors.length > 0) {
 						$('#gconfig-save-status').attr('class', 'gconfig-save-error').text( mw.msg('gConfig-prefs-invalid-values') );
+						// eslint-disable-next-line no-redeclare
 						for(var i=0; i<errors.length; i++) {
 							var id = errors[i][0], info = errors[i][1];
 							$('#'+id).closest('tr').find('.gconfig-pref-error').text(info)
@@ -469,7 +471,7 @@
 				$content = $('<p>').text( mw.msg('gConfig-prefs-no-gadgets') );
 			}
 			
-			$form = $('<form>').attr('id', 'gconfig-form').append( $content );
+			var $form = $('<form>').attr('id', 'gconfig-form').append( $content );
 			$form.on('submit', onsubmit);
 			$form.on('invalid', onsubmit); // we do our own validation - stop the browser from showing its error messages
 			

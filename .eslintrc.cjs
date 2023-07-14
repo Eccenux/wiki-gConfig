@@ -7,6 +7,8 @@ module.exports = {
 	"globals": {
 		"$": true,
 		"mw": true,
+		"jQuery": true,
+		"mediaWiki": true,
 	},
     "extends": "eslint:recommended",
     "parserOptions": {

@@ -2,12 +2,13 @@
  * Dev/staging deploy.
  */
 import {DeployConfig, Wikiploy} from 'wikiploy';
+import {version, info} from './version.mjs';
 
 const ployBot = new Wikiploy();
 
 // custom summary
 ployBot.summary = () => {
-	return 'v1.0.0: move to new repo';
+	return `v${version}: ${info}`;
 }
 
 (async () => {
