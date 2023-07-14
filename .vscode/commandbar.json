@@ -22,6 +22,14 @@
 			"priority": 0
 		},
 		{
+			"text": "wikiploy pl.wp",
+			"tooltip": "Deploy to pl.wikipedia.org",
+			"color": "lightgreen",
+			"commandType": "exec",
+			"command": "node wikiploy-plwiki.mjs",
+			"priority": 0
+		},
+		{
 			"text": "wikiploy all (dev+wp+ws)",
 			"tooltip": "Deploy to all supported wikis.",
 			"color": "lightgreen",
