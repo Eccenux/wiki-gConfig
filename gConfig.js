@@ -106,7 +106,10 @@
 			
 			var value = (uo_value == undefined) ? cookie_value : uo_value;
 			
-			if((value == undefined || uo_value != cookie_value) && !(uo_value == null && cookie_value == '')) needSynchro = true;
+			if((value == undefined || uo_value != cookie_value) && !(uo_value == null && cookie_value == '')) {
+				console.log('[gConfig]', 'readRawSetting: needSynchro', {value, uo_value, cookie_value, gadget, settingName})
+				needSynchro = true;
+			}
 
 			return value;
 		}
