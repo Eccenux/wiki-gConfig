@@ -1,0 +1,15 @@
+{
+	"name": "wiki-gconfig",
+	"type": "commonjs",
+	"scripts": {
+		"test": "mocha"
+	},
+	"devDependencies": {
+		"chai": "4.x",
+		"eslint": "8.x",
+		"mocha": "10.x"
+	},
+	"dependencies": {
+		"wikiploy": "1.x"
+	}
+}

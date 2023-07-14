@@ -9,9 +9,14 @@
  * 
  * See also gConfig.css.
  * 
- * Version: 0.5
+ * Version: 1.0.0
  * Dual-licensed CC-BY-SA 3.0 or newer, GFDL 1.3 or newer
  * Author: [[w:pl:User:Matma Rex]], patches: [[w:pl:User:Kaligula]], [[w:pl:User:Peter Bowman]]
+ * 
+ * Bugz and pull requests:
+ * https://github.com/Eccenux/wiki-gConfig
+ * 
+ * Deployed with love using Wikiploy: [[Wikipedia:Wikiploy]]
  */
 (function(mw, $){
 	mw.loader.using(['mediawiki.cookie', 'mediawiki.api', 'mediawiki.jqueryMsg'], function(){
