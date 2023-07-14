@@ -1,6 +1,5 @@
 let version = '1.1.0';
-// let info = 'storage refactor: no cookies';
-let info = 'storage refactor: debug';
+let info = 'storage refactor: no cookies';
 export {
 	version,
 	info,

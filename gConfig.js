@@ -19,7 +19,7 @@
  * Deployed with love using Wikiploy: [[Wikipedia:Wikiploy]]
  */
 (function(mw, $){
-	mw.loader.using(['mediawiki.cookie', 'mediawiki.api', 'mediawiki.jqueryMsg', 'ext.gadget.lib-localforage'], function(){
+	mw.loader.using(['mediawiki.cookie', 'mediawiki.api', 'mediawiki.jqueryMsg'], function(){
 		mw.messages.set({
 			'gConfig-prefs-page-info': "<p>Na tej stronie możesz zmienić ustawienia włączonych gadżetów.</p><p>Informacje i dokumentacja: [[{{ns:Project}}:Narzędzia/gConfig]].</p>",
 			'gConfig-prefs-page-title': "Preferencje gadżetów",
@@ -57,38 +57,24 @@
 			return [gadget, setting];
 		}
 		
-		/** Helper to use ES6 Promises on mw.Api calls etc. */
-		function $toPromise($promise)
-		{
-			return new Promise(function (resolve, reject) {
-				$promise.then(resolve, reject);
-			});
-		}
-
 		// saves settings in browser storage and in prefs
 		// settings - array of arrays: [gadget, settingName, value]
 		// calls saveSettingsCallback after every successful request
 		function saveSettings(settings, callback)
 		{
 			var grouped = {};
-			var promises = [];
 			
 			for(var i=0; i<settings.length; i++) {
 				var name = internalName(settings[i][0], settings[i][1]);
 				var value = settings[i][2];
 				
-				$.cookie(name, value, {expires: 365, path: '/', secure: true});
-				if((''+value).match(/\|/)) {
-					promises.push($toPromise(api.saveOption('userjs-'+name, value)));
-				}
-				else {
-					grouped['userjs-'+name] = value;
-				}
+				grouped['userjs-'+name] = value;
 			}
-			
-			promises.push($toPromise(api.saveOptions(grouped)));
 
-			Promise.all(promises).then(function(){
+			// remove legacy cookies
+			$.removeCookie(name, {path: '/', secure: true});
+
+			api.saveOptions(grouped).then(function(){
 				callback();
 			});
 			
@@ -97,19 +83,10 @@
 		
 		// reads raw setting from mw.user.options or cookies.
 		// returns undefined if it's not saved anywhere.
-		// sets needSynchro to true if data differs or setting is missing.
 		function readRawSetting(gadget, settingName)
 		{
 			var name = internalName(gadget, settingName);
-			var uo_value = mw.user.options.get('userjs-'+name);
-			var cookie_value = $.cookie(name);
-			
-			var value = (uo_value == undefined) ? cookie_value : uo_value;
-			
-			if((value == undefined || uo_value != cookie_value) && !(uo_value == null && cookie_value == '')) {
-				console.log('[gConfig]', 'readRawSetting: needSynchro', {value, uo_value, cookie_value, gadget, settingName})
-				needSynchro = true;
-			}
+			var value = mw.user.options.get('userjs-'+name);
 
 			return value;
 		}
@@ -263,10 +240,6 @@
 				? {name: gadgetInfo}
 				: gadgetInfo;
 			
-			if(needSynchro) {
-				needSynchro = false;
-				gConfig.synchronise(function(){});
-			}
 			specialPage();
 		}
 		
@@ -288,7 +261,6 @@
 		}
 		
 		
-		var needSynchro = false;
 		var synchroRunning = false;
 		var synchroDelayedCallbacks = [];
 		
