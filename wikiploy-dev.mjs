@@ -1,10 +1,11 @@
 /**
  * Dev/staging deploy.
  */
-import {DeployConfig, Wikiploy} from 'wikiploy';
+import {DeployConfig, WikiployLite} from 'wikiploy';
 import {version, info} from './version.mjs';
 
-const ployBot = new Wikiploy();
+import * as botpass from './bot.config.mjs';
+const ployBot = new WikiployLite(botpass);
 
 // custom summary
 ployBot.summary = () => {

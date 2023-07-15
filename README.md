@@ -11,7 +11,7 @@ Dokumentacja użytkowa i dla twórców gadżetów znajduje się na Polskiej Wiki
 [Wikipedia:Narzędzia/gConfig](https://pl.wikipedia.org/wiki/Wikipedia:Narz%C4%99dzia/gConfig).
 
 
-### Wykorzystanie API
+### Wykorzystane API
 
 Pobieranie opcji z MW:
 https://www.mediawiki.org/wiki/ResourceLoader/Core_modules#mediawiki.user
