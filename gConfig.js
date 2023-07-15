@@ -11,7 +11,9 @@
  * 
  * Version: 1.1.0
  * Dual-licensed CC-BY-SA 3.0 or newer, GFDL 1.3 or newer
- * Author: [[w:pl:User:Matma Rex]], patches: [[w:pl:User:Kaligula]], [[w:pl:User:Peter Bowman]]
+ * Author: [[w:pl:User:Matma Rex]], patches: [[w:pl:User:Kaligula]], [[w:pl:User:Peter Bowman]], [[w:pl:User:Nux]], [[w:pl:User:Wargo]]
+ * See also:
+ * https://xtools.wmcloud.org/articleinfo/pl.wikipedia.org/MediaWiki:Gadget-gConfig.js?uselang=pl#top-editors
  * 
  * Bugz and pull requests:
  * https://github.com/Eccenux/wiki-gConfig
