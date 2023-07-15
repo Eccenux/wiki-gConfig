@@ -69,10 +69,10 @@
 				var value = settings[i][2];
 				
 				grouped['userjs-'+name] = value;
-			}
 
-			// remove legacy cookies
-			$.removeCookie(name, {path: '/', secure: true});
+				// remove legacy cookies
+				$.removeCookie(name, {path: '/', secure: true});
+			}
 
 			api.saveOptions(grouped).then(function(){
 				callback();
