@@ -46,7 +46,7 @@
 		var api = new mw.Api();
 		
 		// generate internal name for this setting.
-		// used as input names, storage names, options' names...
+		// used as input names, storage names...
 		function internalName(gadget, setting)
 		{
 			return 'gconfig-'+gadget+'-'+setting;
@@ -59,7 +59,7 @@
 			return [gadget, setting];
 		}
 		
-		// saves settings in browser storage and in prefs
+		// saves settings in user prefs
 		// settings - array of arrays: [gadget, settingName, value]
 		// calls saveSettingsCallback after every successful request
 		function saveSettings(settings, callback)
