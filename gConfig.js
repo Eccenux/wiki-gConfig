@@ -9,7 +9,7 @@
  * 
  * See also gConfig.css.
  * 
- * Version: 1.1.0
+ * Version: 1.1.1
  * Dual-licensed CC-BY-SA 3.0 or newer, GFDL 1.3 or newer
  * Author: [[w:pl:User:Matma Rex]], patches: [[w:pl:User:Kaligula]], [[w:pl:User:Peter Bowman]], [[w:pl:User:Nux]], [[w:pl:User:Wargo]]
  * See also:
@@ -58,6 +58,8 @@
 			var gadget = match[1], setting = match[2];
 			return [gadget, setting];
 		}
+
+		var _emptyValue = '__(EMPTY)__';
 		
 		// saves settings in user prefs
 		// settings - array of arrays: [gadget, settingName, value]
@@ -69,6 +71,11 @@
 			for(var i=0; i<settings.length; i++) {
 				var name = internalName(settings[i][0], settings[i][1]);
 				var value = settings[i][2];
+
+				// saving empty values in MW options doesn't seem to work
+				if (typeof value === 'string' && !value.length) {
+					value = _emptyValue;
+				}
 				
 				grouped['userjs-'+name] = value;
 
@@ -89,6 +96,10 @@
 		{
 			var name = internalName(gadget, settingName);
 			var value = mw.user.options.get('userjs-'+name);
+
+			if (value === _emptyValue) {
+				value = '';
+			}
 
 			return value;
 		}
